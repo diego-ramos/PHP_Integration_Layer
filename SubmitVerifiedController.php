@@ -14,9 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // In a real application, you'd process/save $data into your internal database here
+    require_once 'DatabaseLogic.php';
+    $db = new DatabaseLogic();
+    $orderId = $db->savePurchaseOrder($data);
+    $savedMaterialsCount = $db->saveOrderMaterials($orderId, isset($data['materials']) ? $data['materials'] : array());
     
-    // For now, return a success response
-    echo json_encode(['status' => 'success', 'message' => 'Data successfully verified and submitted!']);
+    // Return a success response with the new ID
+    echo json_encode([
+        'status' => 'success', 
+        'message' => "Data successfully verified and saved! Order ID: $orderId ($savedMaterialsCount items)."
+    ]);
 } else {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);

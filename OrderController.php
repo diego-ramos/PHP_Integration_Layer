@@ -1,6 +1,5 @@
 <?php
 require_once 'PdfExtractor.php';
-require_once 'DatabaseLogic.php';
 
 // Check if a file was uploaded successfully
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
@@ -32,14 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
         // Pass the uploaded tmp file path and optional customer id directly to the extractor
         $result = $extractor->extractData($file['tmp_name'], $customerId, $newInstructions);
 
-        // Mock saving data to our database only if valid
-        // Ideally we wouldn't auto-save if confidence is low, but let's assume we store it as 'pending_review'
-        $db = new DatabaseLogic();
-        $orderId = $db->savePurchaseOrder($result);
-        $savedMaterialsCount = $db->saveOrderMaterials($orderId, $result['materials']);
-
         // Attach some extra metadata for the front-end view
-        $result['db_status'] = "Order saved with ID: $orderId. $savedMaterialsCount items saved.";
+        $result['db_status'] = "Data extracted. Pending verification.";
         
         // Send JSON data back to the view
         header('Content-Type: application/json');
