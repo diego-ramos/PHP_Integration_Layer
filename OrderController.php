@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
     
     $file = $_FILES['pdf_upload'];
     $customerId = isset($_POST['customer_id']) && trim($_POST['customer_id']) !== '' ? trim($_POST['customer_id']) : null;
+    $newInstructions = isset($_POST['new_instructions']) && trim($_POST['new_instructions']) !== '' ? trim($_POST['new_instructions']) : null;
     
     // Quick validation
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -29,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
         $extractor = new PdfExtractor($apiUrl, $apiKey);
         
         // Pass the uploaded tmp file path and optional customer id directly to the extractor
-        $result = $extractor->extractData($file['tmp_name'], $customerId);
+        $result = $extractor->extractData($file['tmp_name'], $customerId, $newInstructions);
 
         // Mock saving data to our database only if valid
         // Ideally we wouldn't auto-save if confidence is low, but let's assume we store it as 'pending_review'

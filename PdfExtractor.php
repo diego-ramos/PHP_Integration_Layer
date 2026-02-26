@@ -21,10 +21,11 @@ class PdfExtractor {
      * 
      * @param string $pdfFilePath Absolute or relative path to the PDF.
      * @param string|null $customerId Optional customer ID to fetch specific extraction instructions.
+     * @param string|null $newInstructions Optional new instructions to save for this customer.
      * @return array The JSON decoded array of the extracted data.
      * @throws Exception If cURL fails or returning non-200.
      */
-    public function extractData($pdfFilePath, $customerId = null) {
+    public function extractData($pdfFilePath, $customerId = null, $newInstructions = null) {
         if (!file_exists($pdfFilePath)) {
             throw new Exception("PDF file not found at path: " . $pdfFilePath);
         }
@@ -38,6 +39,10 @@ class PdfExtractor {
         
         if ($customerId) {
             $payload['customer_id'] = $customerId;
+        }
+
+        if ($newInstructions) {
+            $payload['new_instructions'] = $newInstructions;
         }
         
         $jsonPayload = json_encode($payload);
