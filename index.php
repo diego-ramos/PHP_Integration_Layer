@@ -65,6 +65,17 @@
             margin-top: 5px;
             font-size: 14px;
         }
+        .saved-instruction {
+            display: none;
+            font-size: 13px;
+            background-color: #f1f8e9;
+            border-left: 4px solid #8bc34a;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+            color: #33691e;
+            border-radius: 0 4px 4px 0;
+        }
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -191,6 +202,7 @@
                 <label for="verify-po" style="margin: 0;"><strong>Purchase Order:</strong></label>
                 <span id="po-val"></span> <span class="tooltiptext">Low Confidence: Value may be incorrect.</span>
             </div>
+            <div id="saved-po" class="saved-instruction"></div>
             <textarea id="feedback-po" class="feedback-input" placeholder="Please describe where the actual Purchase Order is located in the document."></textarea>
             
             <div class="feedback-row" id="address-container">
@@ -198,6 +210,7 @@
                 <label for="verify-address" style="margin: 0;"><strong>Delivery Address:</strong></label>
                 <span id="address-val"></span> <span class="tooltiptext">Low Confidence: Address may be incomplete.</span>
             </div>
+            <div id="saved-address" class="saved-instruction"></div>
             <textarea id="feedback-address" class="feedback-input" placeholder="Please describe where the correct Delivery Address is located in the document."></textarea>
 
             <div class="feedback-row" id="postal-container">
@@ -205,6 +218,7 @@
                 <label for="verify-postal" style="margin: 0;"><strong>Postal Code:</strong></label>
                 <span id="postal-val"></span> <span class="tooltiptext">Low Confidence: Postal code may be incorrect.</span>
             </div>
+            <div id="saved-postal" class="saved-instruction"></div>
             <textarea id="feedback-postal" class="feedback-input" placeholder="Please describe where the correct Postal Code is located in the document."></textarea>
         </div>
 
@@ -213,6 +227,7 @@
                 <input type="checkbox" id="verify-materials" class="verify-checkbox">
                 <label for="verify-materials" style="margin: 0;"><h3>Materials</h3></label>
             </div>
+            <div id="saved-materials" class="saved-instruction"></div>
             <textarea id="feedback-materials" class="feedback-input" placeholder="Please describe where the actual materials / items table is located, or what columns to scrape."></textarea>
             
             <table>
@@ -322,6 +337,10 @@ function triggerExtraction(formData) {
             input.style.display = 'block';
             input.value = ''; // clear old instructions
         });
+        document.querySelectorAll('.saved-instruction').forEach(el => {
+            el.style.display = 'none';
+            el.textContent = '';
+        });
         validateActionButtons();
 
         // Populate Data
@@ -329,6 +348,23 @@ function triggerExtraction(formData) {
         document.getElementById('po-val').textContent = data.purchase_order || 'N/A';
         document.getElementById('address-val').textContent = data.delivery_address || 'N/A';
         document.getElementById('postal-val').textContent = data.zip_code || 'N/A';
+
+        // Display applied instructions if any
+        if (data.applied_instructions) {
+            const mappings = [
+                { key: 'po', id: 'saved-po' },
+                { key: 'address', id: 'saved-address' },
+                { key: 'postal', id: 'saved-postal' },
+                { key: 'materials', id: 'saved-materials' }
+            ];
+            mappings.forEach(m => {
+                if (data.applied_instructions[m.key]) {
+                    const el = document.getElementById(m.id);
+                    el.textContent = "Saved Instruction: " + data.applied_instructions[m.key];
+                    el.style.display = 'block';
+                }
+            });
+        }
 
         // Populate Materials Table
         const tbody = document.getElementById('materials-table-body');
