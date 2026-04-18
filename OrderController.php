@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
     }
 
     // Configurable endpoint
-    $apiUrl = 'http://localhost:8080/extract_pdf'; // Adjust port or URL as needed
+    $apiUrl = 'https://us-central1-readpdfpo.cloudfunctions.net/cloud-ai-bridge/extract_pdf'; // Adjust port or URL as needed
     $apiKey = getenv('CLOUD_AI_BRIDGE_API_KEY') ?: 'secret-php-api-key'; // Example of picking it up from env or config
 
     try {
