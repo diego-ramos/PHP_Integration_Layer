@@ -6,12 +6,13 @@
     <title>Order PDF Extractor</title>
     <!-- Basic styling for demo -->
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; color: #333; }
-        .container { max-width: 1400px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #0056b3; }
-        .form-group { margin-bottom: 15px; max-width: 800px; margin: 0 auto 15px auto;}
+        body { font-family: sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; color: #333; height: 100vh; box-sizing: border-box; overflow: hidden; }
+        .container { max-width: 1400px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
+        h1 { color: #0056b3; margin-top: 0; margin-bottom: 10px; flex-shrink: 0; }
+        p { margin-top: 0; margin-bottom: 15px; flex-shrink: 0; }
+        .form-group { margin-bottom: 15px; margin: 0 auto 15px auto;}
         
-        #upload-form { max-width: 800px; margin: 0 auto; }
+        #upload-form { margin: 0 auto; }
         .submit-container { text-align: center; margin-top: 20px;}
         
         label { font-weight: bold; display: block; margin-bottom: 5px; }
@@ -19,13 +20,13 @@
         button { background-color: #0056b3; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         button:hover { background-color: #004494; }
         
-        #main-split-view { display: none; margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; display: flex; gap: 20px;}
+        #main-split-view { display: none; margin-top: 10px; border-top: 2px solid #eee; padding-top: 15px; display: flex; gap: 20px; flex: 1; min-height: 0; }
         
-        #pdf-preview-container { flex: 1; border: 1px solid #ddd; background-color: #f9f9f9; display: flex; flex-direction: column;}
+        #pdf-preview-container { flex: 1; border: 1px solid #ddd; background-color: #f9f9f9; display: flex; flex-direction: column; min-height: 0; }
         #pdf-preview-container h2 { margin-top: 0; padding: 10px; background-color: #eef; border-bottom: 1px solid #ddd;}
-        #pdf-preview-iframe { width: 100%; height: 600px; border: none; flex-grow: 1;}
+        #pdf-preview-iframe { width: 100%; height: 100%; border: none; flex-grow: 1;}
         
-        #results-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; max-height: 800px;}
+        #results-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; min-height: 0; padding-right: 10px; }
         .result-block { margin-bottom: 20px; }
         .result-block h3 { margin-bottom: 5px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         
@@ -75,13 +76,6 @@
             margin-bottom: 10px;
             color: #33691e;
             border-radius: 0 4px 4px 0;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #eee;
         }
         #submit-verified-btn { background-color: #28a745; }
         #submit-verified-btn:hover { background-color: #218838; }
@@ -147,11 +141,13 @@
             background-color: #0056b3;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 6px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
             margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .edit-btn:hover {
@@ -171,19 +167,19 @@
     <h1>Order PDF Extraction System</h1>
     <p>Upload a customer PDF order to extract its structured data.</p>
     
-    <form id="upload-form" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="customer_id">Customer ID (Optional):</label>
+    <form id="upload-form" enctype="multipart/form-data" style="display: flex; align-items: flex-start; gap: 20px; width: 100%; margin: 0 0 10px 0; flex-shrink: 0;">
+        <div class="form-group" style="width: 200px; flex-shrink: 0; margin: 0;">
+            <label for="customer_id" style="white-space: nowrap;">Customer ID (Optional):</label>
             <input type="text" name="customer_id" id="customer_id" placeholder="e.g. CUST-999" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            <small style="color: #666; display: block; margin-top: 5px;">Used to apply specific instructions for tricky PDF formats.</small>
+            <small style="color: #666; display: block; margin-top: 5px; font-size: 11px; line-height: 1.2;">Used to apply specific instructions for tricky PDF formats.</small>
         </div>
-        <div class="form-group" style="margin-top: 15px;">
+        <div class="form-group" style="flex-grow: 1; margin: 0;">
             <label for="pdf_upload">Select PDF File:</label>
-            <input type="file" name="pdf_upload" id="pdf_upload" accept="application/pdf" required>
+            <input type="file" name="pdf_upload" id="pdf_upload" accept="application/pdf" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff;" required>
         </div>
-        <div class="submit-container">
-            <button type="submit" id="submit-btn">Extract Data</button>
-            <div id="loading" class="loader" style="margin: 10px auto;"></div>
+        <div class="submit-container" style="margin: 0; display: flex; align-items: center; padding-top: 22px; flex-shrink: 0;">
+            <button type="submit" id="submit-btn" style="margin-top: 0; padding: 10px 20px; white-space: nowrap;">Extract Data</button>
+            <div id="loading" class="loader" style="margin: 0 0 0 10px;"></div>
         </div>
     </form>
     
@@ -200,7 +196,16 @@
 
         <!-- Right Side: Extraction Results -->
         <div id="results-container">
-        <h2>Extracted Data</h2>
+        <div style="position: sticky; top: 0; background-color: #fff; z-index: 10; padding-bottom: 10px; border-bottom: 2px solid #eee; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;">Extracted Data</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button id="submit-verified-btn" disabled style="margin-top: 0; font-size: 14px; padding: 8px 16px;">Submit Verified Data</button>
+                    <button id="re-extract-btn" disabled style="margin-top: 0; font-size: 14px; padding: 8px 16px;">Re-Extract with New Instructions</button>
+                </div>
+            </div>
+            <div id="action-message" style="color: green; margin-top: 10px; font-weight: bold; display: none; text-align: right;"></div>
+        </div>
         
         <div id="low-confidence-alert" class="low-confidence-alert">
             [!] WARNING: Low Confidence Score (<span id="confidence-value"></span>). Please review the highlighted fields manually.
@@ -216,7 +221,9 @@
                 <input type="checkbox" id="verify-po" class="verify-checkbox">
                 <label for="verify-po" style="margin: 0;"><strong>Purchase Order:</strong></label>
                 <span id="po-val"></span> <span class="tooltiptext">Low Confidence: Value may be incorrect.</span>
-                <button class="edit-btn" onclick="toggleFeedback('feedback-po')">Edit</button>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-po')" title="Click to describe where the actual Purchase Order is located in the document.">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                </button>
             </div>
             <div id="saved-po" class="saved-instruction"></div>
             <textarea id="feedback-po" class="feedback-input" placeholder="Please describe where the actual Purchase Order is located in the document."></textarea>
@@ -225,7 +232,9 @@
                 <input type="checkbox" id="verify-address" class="verify-checkbox">
                 <label for="verify-address" style="margin: 0;"><strong>Delivery Address:</strong></label>
                 <span id="address-val"></span> <span class="tooltiptext">Low Confidence: Address may be incomplete.</span>
-                <button class="edit-btn" onclick="toggleFeedback('feedback-address')">Edit</button>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-address')" title="Click to describe where the correct Delivery Address is located in the document.">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                </button>
             </div>
             <div id="saved-address" class="saved-instruction"></div>
             <textarea id="feedback-address" class="feedback-input" placeholder="Please describe where the correct Delivery Address is located in the document."></textarea>
@@ -234,7 +243,9 @@
                 <input type="checkbox" id="verify-postal" class="verify-checkbox">
                 <label for="verify-postal" style="margin: 0;"><strong>Postal Code:</strong></label>
                 <span id="postal-val"></span> <span class="tooltiptext">Low Confidence: Postal code may be incorrect.</span>
-                <button class="edit-btn" onclick="toggleFeedback('feedback-postal')">Edit</button>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-postal')" title="Click to describe where the correct Postal Code is located in the document.">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                </button>
             </div>
             <div id="saved-postal" class="saved-instruction"></div>
             <textarea id="feedback-postal" class="feedback-input" placeholder="Please describe where the correct Postal Code is located in the document."></textarea>
@@ -244,7 +255,9 @@
             <div class="feedback-row" style="margin-bottom: 10px;">
                 <input type="checkbox" id="verify-materials" class="verify-checkbox">
                 <label for="verify-materials" style="margin: 0;"><h3>Materials</h3></label>
-                <button class="edit-btn" onclick="toggleFeedback('feedback-materials')">Edit</button>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-materials')" title="Click to describe where the actual materials / items table is located, or what columns to scrape.">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/></svg>
+                </button>
             </div>
             <div id="saved-materials" class="saved-instruction"></div>
             <textarea id="feedback-materials" class="feedback-input" placeholder="Please describe where the actual materials / items table is located, or what columns to scrape."></textarea>
@@ -264,13 +277,6 @@
             </table>
         </div>
         
-        <div id="action-message" style="color: green; margin-top: 10px; font-weight: bold; display: none;"></div>
-
-        <div class="action-buttons">
-            <button id="submit-verified-btn" disabled>Submit Verified Data</button>
-            <button id="re-extract-btn" disabled>Re-Extract with New Instructions</button>
-        </div>
-
     </div> <!-- End Split View -->
 </div>
 
@@ -283,10 +289,14 @@ document.querySelectorAll('.verify-checkbox').forEach(box => {
         // Toggle the visibility of the corresponding feedback input based on checkbox state
         const targetInputId = this.id.replace('verify-', 'feedback-');
         const feedbackInput = document.getElementById(targetInputId);
+        const row = this.closest('.feedback-row');
+        const editBtn = row ? row.querySelector('.edit-btn') : null;
+
         if (this.checked) {
             feedbackInput.style.display = 'none';
+            if (editBtn) editBtn.style.display = 'none';
         } else {
-            feedbackInput.style.display = 'block';
+            if (editBtn) editBtn.style.display = '';
         }
         
         validateActionButtons();
@@ -353,8 +363,11 @@ function triggerExtraction(formData) {
             box.checked = false;
         });
         document.querySelectorAll('.feedback-input').forEach(input => {
-            //input.style.display = 'block';
+            input.style.display = 'none';
             input.value = ''; // clear old instructions
+        });
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.style.display = ''; // reset edit button visibility
         });
         document.querySelectorAll('.saved-instruction').forEach(el => {
             el.style.display = 'none';
