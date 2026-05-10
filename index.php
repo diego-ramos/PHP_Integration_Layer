@@ -143,6 +143,21 @@
             margin-top: 10px;
         }
 
+        .edit-btn {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .edit-btn:hover {
+            background-color: #004494;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -201,6 +216,7 @@
                 <input type="checkbox" id="verify-po" class="verify-checkbox">
                 <label for="verify-po" style="margin: 0;"><strong>Purchase Order:</strong></label>
                 <span id="po-val"></span> <span class="tooltiptext">Low Confidence: Value may be incorrect.</span>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-po')">Edit</button>
             </div>
             <div id="saved-po" class="saved-instruction"></div>
             <textarea id="feedback-po" class="feedback-input" placeholder="Please describe where the actual Purchase Order is located in the document."></textarea>
@@ -209,6 +225,7 @@
                 <input type="checkbox" id="verify-address" class="verify-checkbox">
                 <label for="verify-address" style="margin: 0;"><strong>Delivery Address:</strong></label>
                 <span id="address-val"></span> <span class="tooltiptext">Low Confidence: Address may be incomplete.</span>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-address')">Edit</button>
             </div>
             <div id="saved-address" class="saved-instruction"></div>
             <textarea id="feedback-address" class="feedback-input" placeholder="Please describe where the correct Delivery Address is located in the document."></textarea>
@@ -217,6 +234,7 @@
                 <input type="checkbox" id="verify-postal" class="verify-checkbox">
                 <label for="verify-postal" style="margin: 0;"><strong>Postal Code:</strong></label>
                 <span id="postal-val"></span> <span class="tooltiptext">Low Confidence: Postal code may be incorrect.</span>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-postal')">Edit</button>
             </div>
             <div id="saved-postal" class="saved-instruction"></div>
             <textarea id="feedback-postal" class="feedback-input" placeholder="Please describe where the correct Postal Code is located in the document."></textarea>
@@ -226,6 +244,7 @@
             <div class="feedback-row" style="margin-bottom: 10px;">
                 <input type="checkbox" id="verify-materials" class="verify-checkbox">
                 <label for="verify-materials" style="margin: 0;"><h3>Materials</h3></label>
+                <button class="edit-btn" onclick="toggleFeedback('feedback-materials')">Edit</button>
             </div>
             <div id="saved-materials" class="saved-instruction"></div>
             <textarea id="feedback-materials" class="feedback-input" placeholder="Please describe where the actual materials / items table is located, or what columns to scrape."></textarea>
@@ -334,7 +353,7 @@ function triggerExtraction(formData) {
             box.checked = false;
         });
         document.querySelectorAll('.feedback-input').forEach(input => {
-            input.style.display = 'block';
+            //input.style.display = 'block';
             input.value = ''; // clear old instructions
         });
         document.querySelectorAll('.saved-instruction').forEach(el => {
@@ -414,6 +433,15 @@ function triggerExtraction(formData) {
         errorMessage.style.display = 'block';
         console.error('Error:', error);
     });
+}
+
+function toggleFeedback(id) {
+    const feedbackInput = document.getElementById(id);
+    if (feedbackInput.style.display === 'none' || feedbackInput.style.display === '') {
+        feedbackInput.style.display = 'block';
+    } else {
+        feedbackInput.style.display = 'none';
+    }
 }
 
 document.getElementById('upload-form').addEventListener('submit', function(e) {
