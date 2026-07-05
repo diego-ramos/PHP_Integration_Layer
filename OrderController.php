@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
     $file = $_FILES['pdf_upload'];
     $customerId = isset($_POST['customer_id']) && trim($_POST['customer_id']) !== '' ? trim($_POST['customer_id']) : null;
     $newInstructions = isset($_POST['new_instructions']) && trim($_POST['new_instructions']) !== '' ? trim($_POST['new_instructions']) : null;
+    $rotatePages = isset($_POST['rotate_pages']) ? (int)$_POST['rotate_pages'] : 0;
     
     // Quick validation
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -21,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
     }
 
     // Configurable endpoint
-    $apiUrl = 'https://us-central1-readpdfpo.cloudfunctions.net/cloud-ai-bridge/extract_pdf'; // Adjust port or URL as needed
+    $apiUrl = 'http://localhost:8080/extract_pdf'; // Adjust port or URL as needed
     $apiKey = getenv('CLOUD_AI_BRIDGE_API_KEY') ?: 'secret-php-api-key'; // Example of picking it up from env or config
 
     try {
@@ -29,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
         $extractor = new PdfExtractor($apiUrl, $apiKey);
         
         // Pass the uploaded tmp file path and optional customer id directly to the extractor
-        $result = $extractor->extractData($file['tmp_name'], $customerId, $newInstructions);
+        $result = $extractor->extractData($file['tmp_name'], $customerId, $newInstructions, $rotatePages);
 
         // Attach some extra metadata for the front-end view
         $result['db_status'] = "Data extracted. Pending verification.";

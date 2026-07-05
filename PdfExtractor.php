@@ -25,7 +25,7 @@ class PdfExtractor {
      * @return array The JSON decoded array of the extracted data.
      * @throws Exception If cURL fails or returning non-200.
      */
-    public function extractData($pdfFilePath, $customerId = null, $newInstructions = null) {
+    public function extractData($pdfFilePath, $customerId = null, $newInstructions = null, $rotatePages = 0) {
         if (!file_exists($pdfFilePath)) {
             throw new Exception("PDF file not found at path: " . $pdfFilePath);
         }
@@ -34,7 +34,8 @@ class PdfExtractor {
         $base64Pdf = base64_encode($pdfContent);
 
         $payload = array(
-            'pdf_base64' => $base64Pdf
+            'pdf_base64' => $base64Pdf,
+            'rotate_pages' => $rotatePages
         );
         
         if ($customerId) {

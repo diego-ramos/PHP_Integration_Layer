@@ -20,6 +20,9 @@
         button { background-color: #0056b3; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
         button:hover { background-color: #004494; }
         
+        #submit-btn { background-color: #ffc107; color: #333; }
+        #submit-btn:hover { background-color: #e0a800; }
+        
         #main-split-view { display: none; margin-top: 10px; border-top: 2px solid #eee; padding-top: 15px; display: flex; gap: 20px; flex: 1; min-height: 0; }
         
         #pdf-preview-container { flex: 1; border: 1px solid #ddd; background-color: #f9f9f9; display: flex; flex-direction: column; min-height: 0; }
@@ -171,11 +174,20 @@
         <div class="form-group" style="width: 200px; flex-shrink: 0; margin: 0;">
             <label for="customer_id" style="white-space: nowrap;">Customer ID (Optional):</label>
             <input type="text" name="customer_id" id="customer_id" placeholder="e.g. CUST-999" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            <small style="color: #666; display: block; margin-top: 5px; font-size: 11px; line-height: 1.2;">Used to apply specific instructions for tricky PDF formats.</small>
+            <small style="color: #666; display: block; margin-top: 5px; font-size: 11px; line-height: 1.2;">Used to apply specific instructions.</small>
         </div>
         <div class="form-group" style="flex-grow: 1; margin: 0;">
             <label for="pdf_upload">Select PDF File:</label>
             <input type="file" name="pdf_upload" id="pdf_upload" accept="application/pdf" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff;" required>
+        </div>
+        <div class="form-group" style="width: 180px; flex-shrink: 0; margin: 0;">
+            <label for="rotate_pages" style="white-space: nowrap;">Rotate Pages:</label>
+            <select name="rotate_pages" id="rotate_pages" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: #fff;">
+                <option value="0">None (0°)</option>
+                <option value="90">Rotate Right (90°)</option>
+                <option value="180">Upside Down (180°)</option>
+                <option value="270">Rotate Left (270°)</option>
+            </select>
         </div>
         <div class="submit-container" style="margin: 0; display: flex; align-items: center; padding-top: 22px; flex-shrink: 0;">
             <button type="submit" id="submit-btn" style="margin-top: 0; padding: 10px 20px; white-space: nowrap;">Extract Data</button>
@@ -265,6 +277,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Item Number</th>
                         <th>Description</th>
                         <th>Quantity</th>
@@ -403,9 +416,10 @@ function triggerExtraction(formData) {
         tbody.innerHTML = ''; // clear previous
         
         if (data.materials && data.materials.length > 0) {
-            data.materials.forEach(item => {
+            data.materials.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
+                    <td><strong>${index + 1}</strong></td>
                     <td>${item.item_number || ''}</td>
                     <td>${item.description || ''}</td>
                     <td>${item.quantity || ''}</td>
@@ -414,7 +428,7 @@ function triggerExtraction(formData) {
                 tbody.appendChild(tr);
             });
         } else {
-            tbody.innerHTML = '<tr><td colspan="4">No materials found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5">No materials found.</td></tr>';
         }
 
         // Logic for "Low Confidence" highlighting
@@ -436,8 +450,9 @@ function triggerExtraction(formData) {
             table.classList.remove('highlight-unconfident');
         }
 
-        // Show the flexbox split layout
+        // Show the flexbox split layout and results container
         splitView.style.display = 'flex';
+        document.getElementById('results-container').style.display = 'flex';
     })
     .catch(error => {
         submitBtn.disabled = false;
@@ -467,11 +482,69 @@ document.getElementById('upload-form').addEventListener('submit', function(e) {
     if (pdfUploadInput.files && pdfUploadInput.files[0]) {
         const fileURL = window.URL.createObjectURL(pdfUploadInput.files[0]);
         document.getElementById('pdf-preview-iframe').src = fileURL;
+        applyIframeRotation();
     }
     
     const formData = new FormData(this);
     triggerExtraction(formData);
 });
+
+// Update rotation visually when the dropdown changes
+document.getElementById('rotate_pages').addEventListener('change', function() {
+    applyIframeRotation();
+});
+
+// Also update when a file is selected manually before submitting
+document.getElementById('pdf_upload').addEventListener('change', function() {
+    if (this.files && this.files[0]) {
+        const fileURL = window.URL.createObjectURL(this.files[0]);
+        document.getElementById('pdf-preview-iframe').src = fileURL;
+        applyIframeRotation();
+        
+        // Hide and clear results to avoid confusion
+        currentExtractedData = null;
+        document.getElementById('results-container').style.display = 'none';
+        
+        document.getElementById('main-split-view').style.display = 'flex'; // Show preview early
+    }
+});
+
+// Fetch saved customer settings when Customer ID is entered
+document.getElementById('customer_id').addEventListener('blur', function() {
+    const custId = this.value.trim();
+    if (!custId) return;
+    
+    fetch('GetCustomerConfig.php?customer_id=' + encodeURIComponent(custId))
+    .then(r => r.json())
+    .then(data => {
+        if (!data.error && data.rotate_pages !== undefined) {
+            const rotateSelect = document.getElementById('rotate_pages');
+            rotateSelect.value = data.rotate_pages;
+            
+            // Apply rotation visually if a PDF is currently loaded
+            const iframe = document.getElementById('pdf-preview-iframe');
+            if (iframe && iframe.src && iframe.src !== window.location.href) {
+                applyIframeRotation();
+            }
+        }
+    })
+    .catch(err => console.error("Could not fetch customer config:", err));
+});
+
+function applyIframeRotation() {
+    const rotation = document.getElementById('rotate_pages').value;
+    const iframe = document.getElementById('pdf-preview-iframe');
+    
+    iframe.style.transition = 'transform 0.3s ease';
+    iframe.style.transformOrigin = 'center center';
+    
+    if (rotation === '90' || rotation === '270') {
+        // Since width/height don't swap, we scale it down slightly so it doesn't get clipped horizontally
+        iframe.style.transform = `rotate(${rotation}deg) scale(0.75)`;
+    } else {
+        iframe.style.transform = `rotate(${rotation}deg)`;
+    }
+}
 
 // Re-extract Button Logic
 document.getElementById('re-extract-btn').addEventListener('click', function() {
@@ -491,7 +564,7 @@ document.getElementById('re-extract-btn').addEventListener('click', function() {
 
     let combinedInstructions = {};
     if (!document.getElementById('verify-po').checked && poInstr) {
-        combinedInstructions['po'] = `Purchase Order Location: ${poInstr}`;
+        combinedInstructions['po'] = poInstr;
     }
     if (!document.getElementById('verify-address').checked && addressInstr) {
         combinedInstructions['address'] = `Delivery Address Location: ${addressInstr}`;
