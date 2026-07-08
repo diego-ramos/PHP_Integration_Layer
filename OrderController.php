@@ -1,6 +1,31 @@
 <?php
 require_once 'PdfExtractor.php';
 
+// Simple .env file loader
+$envFile = __DIR__ . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        $parts = explode('=', $line, 2);
+        if (count($parts) === 2) {
+            $name = trim($parts[0]);
+            $value = trim($parts[1]);
+            // Strip quotes if present
+            if (preg_match('/^"(.*)"$/', $value, $matches) || preg_match("/^'(.*)'$/", $value, $matches)) {
+                $value = $matches[1];
+            }
+            if (!array_key_exists($name, $_SERVER) && !array_key_exists($name, $_ENV)) {
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        }
+    }
+}
+
 // Check if a file was uploaded successfully
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
     
@@ -22,8 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pdf_upload'])) {
     }
 
     // Configurable endpoint
-    $apiUrl = 'http://localhost:8080/extract_pdf'; // Adjust port or URL as needed
-    $apiKey = getenv('CLOUD_AI_BRIDGE_API_KEY') ?: 'secret-php-api-key'; // Example of picking it up from env or config
+    $apiBaseUrl = getenv('CLOUD_AI_BRIDGE_API_URL') ? : 'http://localhost:8080/';
+    $apiUrl = rtrim($apiBaseUrl, '/') . '/extract_pdf';
+    $apiKey = getenv('CLOUD_AI_BRIDGE_API_KEY') ?: 'secret-php-api-key';
 
     try {
         // Initialize extractor
